@@ -86,7 +86,7 @@ function irc.hooks.ctcp(msg)
 
 	if command == "ACTION" and msg.args[1] == irc.config.channel then
 		local action = text:sub(8, -1)
-		irc.sendLocal(("* %s@IRC %s"):format(msg.user.nick, action))
+		irc.sendLocal(("* %s@xeroxIRC %s"):format(msg.user.nick, action))
 	elseif command == "VERSION" then
 		reply(("Minetest version %s, IRC mod version %s.")
 			:format(get_core_version(), irc.version))
@@ -106,7 +106,9 @@ function irc.hooks.channelChat(msg)
 	-- Don't let a user impersonate someone else by using the nick "IRC"
 	local fake = msg.user.nick:lower():match("^[il|]rc$")
 	if fake then
-		irc.sendLocal("<"..msg.user.nick.."@IRC> "..text)
+		irc.sendLocal("<"..msg.user.nick.."@xeroxIRC> "..text)
+		return
+	elseif msg.user.nick == "BlockyRelay" then
 		return
 	end
 
@@ -138,7 +140,7 @@ function irc.hooks.channelChat(msg)
 		irc.sendLocal(("* %s@%s %s")
 				:format(actionnick, msg.user.nick, actionmessage))
 	else
-		irc.sendLocal(("<%s@IRC> %s"):format(msg.user.nick, text))
+		irc.sendLocal(("<%s@xeroxIRC> %s"):format(msg.user.nick, text))
 	end
 end
 
@@ -156,10 +158,10 @@ end
 
 function irc.hooks.kick(channel, target, prefix, reason)
 	if target == irc.conn.nick then
-		minetest.chat_send_all("IRC: kicked from "..channel.." by "..prefix.nick..".")
+		minetest.chat_send_all("IRC: kicked from "..channel.." (xeroxIRC) by "..prefix.nick..".")
 		irc.disconnect("Kicked")
 	else
-		irc.sendLocal(("-!- %s was kicked from %s by %s [%s]")
+		irc.sendLocal(("-!- %s was kicked from %s (xeroxIRC) by %s [%s]")
 				:format(target, channel, prefix.nick, reason))
 	end
 end
@@ -167,7 +169,7 @@ end
 
 function irc.hooks.notice(user, target, message)
 	if user.nick and target == irc.config.channel then
-		irc.sendLocal("-"..user.nick.."@IRC- "..message)
+		irc.sendLocal("-"..user.nick.."@xeroxIRC- "..message)
 	end
 end
 
@@ -194,20 +196,20 @@ end
 
 
 function irc.hooks.join(user, channel)
-	irc.sendLocal(("-!- %s joined %s")
+	irc.sendLocal(("-!- %s joined %s (xeroxIRC)")
 			:format(user.nick, channel))
 end
 
 
 function irc.hooks.part(user, channel, reason)
 	reason = reason or ""
-	irc.sendLocal(("-!- %s has left %s [%s]")
+	irc.sendLocal(("-!- %s has left %s (xeroxIRC) [%s]")
 			:format(user.nick, channel, reason))
 end
 
 
 function irc.hooks.quit(user, reason)
-	irc.sendLocal(("-!- %s has quit [%s]")
+	irc.sendLocal(("-!- %s has quit xeroxIRC [%s]")
 			:format(user.nick, reason))
 end
 
