@@ -1,5 +1,5 @@
 
-irc.bot_commands = {}
+irc2.bot_commands = {}
 
 -- From RFC1459:
 -- "Because of IRC’s scandanavian origin, the characters {}| are
@@ -15,9 +15,9 @@ local function nickequals(nick1, nick2)
 	return irclower(nick1) == irclower(nick2)
 end
 
-function irc.check_botcmd(msg)
-	local prefix = irc.config.command_prefix
-	local nick = irc.conn.nick
+function irc2.check_botcmd(msg)
+	local prefix = irc2.config.command_prefix
+	local nick = irc2.conn.nick
 	local text = msg.args[2]
 	local nickpart = text:sub(1, #nick)
 	local suffix = text:sub(#nick+1, #nick+2)
@@ -25,18 +25,18 @@ function irc.check_botcmd(msg)
 	-- First check for a nick prefix
 	if nickequals(nickpart, nick)
 			and (suffix == ": " or suffix == ", ") then
-		irc.bot_command(msg, text:sub(#nick + 3))
+		irc2.bot_command(msg, text:sub(#nick + 3))
 		return true
 	-- Then check for the configured prefix
 	elseif prefix and text:sub(1, #prefix):lower() == prefix:lower() then
-		irc.bot_command(msg, text:sub(#prefix + 1))
+		irc2.bot_command(msg, text:sub(#prefix + 1))
 		return true
 	end
 	return false
 end
 
 
-function irc.bot_command(msg, text)
+function irc2.bot_command(msg, text)
 	-- Remove leading whitespace
 	text = text:match("^%s*(.*)")
 	if text:sub(1, 1) == "@" then
@@ -44,15 +44,15 @@ function irc.bot_command(msg, text)
 		if not player_to then
 			return
 		elseif not minetest.get_player_by_name(player_to) then
-			irc.reply("User '"..player_to.."' is not in the game.")
+			irc2.reply("User '"..player_to.."' is not in the game.")
 			return
-		elseif not irc.joined_players[player_to] then
-			irc.reply("User '"..player_to.."' is not using IRC.")
+		elseif not irc2.joined_players[player_to] then
+			irc2.reply("User '"..player_to.."' is not using IRC.")
 			return
 		end
 		minetest.chat_send_player(player_to,
 				"PM from "..msg.user.nick.."@IRC: "..message, false)
-		irc.reply("Message sent!")
+		irc2.reply("Message sent!")
 		return
 	end
 	local pos = text:find(" ", 1, true)
@@ -65,36 +65,36 @@ function irc.bot_command(msg, text)
 		args = ""
 	end
 
-	if not irc.bot_commands[cmd] then
-		irc.reply("Unknown command '"..cmd.."'. Try 'help'."
+	if not irc2.bot_commands[cmd] then
+		irc2.reply("Unknown command '"..cmd.."'. Try 'help'."
 			.." Or use @playername <message> to send a private message")
 		return
 	end
 
-	local _, message = irc.bot_commands[cmd].func(msg.user, args)
+	local _, message = irc2.bot_commands[cmd].func(msg.user, args)
 	if message then
-		irc.reply(message)
+		irc2.reply(message)
 	end
 end
 
 
-function irc.register_bot_command(name, def)
+function irc2.register_bot_command(name, def)
 	if (not def.func) or (type(def.func) ~= "function") then
 		error("Erroneous bot command definition. def.func missing.", 2)
 	elseif name:sub(1, 1) == "@" then
 		error("Erroneous bot command name. Command name begins with '@'.", 2)
 	end
-	irc.bot_commands[name] = def
+	irc2.bot_commands[name] = def
 end
 
 
-irc.register_bot_command("help", {
+irc2.register_bot_command("help", {
 	params = "<command>",
 	description = "Get help about a command",
 	func = function(_, args)
 		if args == "" then
 			local cmdlist = { }
-			for name in pairs(irc.bot_commands) do
+			for name in pairs(irc2.bot_commands) do
 				cmdlist[#cmdlist+1] = name
 			end
 			return true, "Available commands: "..table.concat(cmdlist, ", ")
@@ -102,13 +102,13 @@ irc.register_bot_command("help", {
 					.." help about a specific command."
 		end
 
-		local cmd = irc.bot_commands[args]
+		local cmd = irc2.bot_commands[args]
 		if not cmd then
 			return false, "Unknown command '"..args.."'."
 		end
 
 		return true, ("Usage: %s%s %s -- %s"):format(
-				irc.config.command_prefix or "",
+				irc2.config.command_prefix or "",
 				args,
 				cmd.params or "<no parameters>",
 				cmd.description or "<no description>")
@@ -116,7 +116,7 @@ irc.register_bot_command("help", {
 })
 
 
-irc.register_bot_command("list", {
+irc2.register_bot_command("list", {
 	params = "",
 	description = "List available commands.",
 	func = function()
@@ -126,7 +126,7 @@ irc.register_bot_command("list", {
 })
 
 
-irc.register_bot_command("whereis", {
+irc2.register_bot_command("whereis", {
 	params = "<player>",
 	description = "Tell the location of <player>",
 	func = function(_, args)
@@ -137,7 +137,7 @@ irc.register_bot_command("whereis", {
 		if not player then
 			return false, "There is no player named '"..args.."'"
 		end
-		local fmt = "Player %s is at [CENSORED]"
+		local fmt = "Player %s is at (%.2f,%.2f,%.2f)"
 		local pos = player:getpos()
 		return true, fmt:format(args, pos.x, pos.y, pos.z)
 	end
@@ -145,7 +145,7 @@ irc.register_bot_command("whereis", {
 
 
 local starttime = os.time()
-irc.register_bot_command("uptime", {
+irc2.register_bot_command("uptime", {
 	description = "Tell how much time the server has been up",
 	func = function()
 		local cur_time = os.time()
@@ -160,7 +160,7 @@ irc.register_bot_command("uptime", {
 })
 
 
-irc.register_bot_command("players", {
+irc2.register_bot_command("players", {
 	description = "List the players on the server",
 	func = function()
 		local players = minetest.get_connected_players()

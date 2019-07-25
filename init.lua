@@ -28,7 +28,6 @@ if not rawget(_G, "jit") and package.config:sub(1, 1) == "/" then
 			";/usr/share/lua/5.1/?/init.lua"
 	ie.package.cpath = ie.package.cpath..
 			";/usr/lib/lua/5.1/?.so"
-	ie.package.cpath = "/usr/lib/x86_64-linux-gnu/lua/5.1/?.so;"..ie.package.cpath
 end
 
 -- Temporarily set require so that LuaIRC can access it
@@ -41,7 +40,7 @@ rawset(_G, "module", ie.module)
 
 local lib = ie.require("irc")
 
-irc = {
+irc2 = {
 	version = "0.2.0",
 	connected = false,
 	cur_time = 0,
@@ -53,7 +52,7 @@ irc = {
 }
 
 -- Compatibility
-rawset(_G, "mt_irc", irc)
+rawset(_G, "mt_irc2", irc2)
 
 local getinfo = debug.getinfo
 local warned = { }
@@ -69,7 +68,7 @@ local function warn_deprecated(k)
 end
 
 -- This is a hack.
-setmetatable(irc, {
+setmetatable(irc2, {
 	__newindex = function(t, k, v)
 		if type(v) == "function" then
 			local f = v
@@ -97,33 +96,28 @@ dofile(modpath.."/botcmds.lua")
 require = old_require
 rawset(_G, "module", old_module)
 
-if irc.config.enable_player_part then
+if irc2.config.enable_player_part then
 	dofile(modpath.."/player_part.lua")
 else
-	setmetatable(irc.joined_players, {__index = function() return true end})
+	setmetatable(irc2.joined_players, {__index = function() return true end})
 end
-
-minetest.register_privilege("irc_admin", {
-	description = "Allow IRC administrative tasks to be performed.",
-	give_to_singleplayer = true
-})
 
 local stepnum = 0
 
-minetest.register_globalstep(function(dtime) return irc.step(dtime) end)
+minetest.register_globalstep(function(dtime) return irc2.step(dtime) end)
 
-function irc.step()
+function irc2.step()
 	if stepnum == 3 then
-		if irc.config.auto_connect then
-			irc.connect()
+		if irc2.config.auto_connect then
+			irc2.connect()
 		end
 	end
 	stepnum = stepnum + 1
 
-	if not irc.connected then return end
+	if not irc2.connected then return end
 
 	-- Hooks will manage incoming messages and errors
-	local good, err = xpcall(function() irc.conn:think() end, debug.traceback)
+	local good, err = xpcall(function() irc2.conn:think() end, debug.traceback)
 	if not good then
 		print(err)
 		return
@@ -131,17 +125,17 @@ function irc.step()
 end
 
 
-function irc.connect()
-	if irc.connected then
+function irc2.connect()
+	if irc2.connected then
 		minetest.log("error", "IRC: Ignoring attempt to connect when already connected.")
 		return
 	end
-	irc.conn = irc.lib.new({
-		nick = irc.config.nick,
-		username = irc.config.username,
-		realname = irc.config.realname,
+	irc2.conn = irc2.lib.new({
+		nick = irc2.config.nick,
+		username = irc2.config.username,
+		realname = irc2.config.realname,
 	})
-	irc.doHook(irc.conn)
+	irc2.doHook(irc2.conn)
 
 	-- We need to swap the `require` function again since
 	-- LuaIRC `require`s `ssl` if `irc.secure` is true.
@@ -149,13 +143,13 @@ function irc.connect()
 	require = ie.require
 
 	local good, message = pcall(function()
-		irc.conn:connect({
-			host = irc.config.server,
-			port = irc.config.port,
-			password = irc.config.password,
-			timeout = irc.config.timeout,
-			reconnect = irc.config.reconnect,
-			secure = irc.config.secure
+		irc2.conn:connect({
+			host = irc2.config.server,
+			port = irc2.config.port,
+			password = irc2.config.password,
+			timeout = irc2.config.timeout,
+			reconnect = irc2.config.reconnect,
+			secure = irc2.config.secure
 		})
 	end)
 
@@ -163,57 +157,66 @@ function irc.connect()
 
 	if not good then
 		minetest.log("error", ("IRC: Connection error: %s: %s -- Reconnecting in %d seconds...")
-					:format(irc.config.server, message, irc.config.reconnect))
-		minetest.after(irc.config.reconnect, function() irc.connect() end)
+					:format(irc2.config.server, message, irc2.config.reconnect))
+		minetest.after(irc2.config.reconnect, function() irc2.connect() end)
 		return
 	end
 
-	if irc.config.NSPass then
-		irc.conn:queue(irc.msgs.privmsg(
-				"NickServ", "IDENTIFY "..irc.config.NSPass))
+	if irc2.config.NSPass then
+		irc2.conn:queue(irc2.msgs.privmsg(
+				"NickServ", "IDENTIFY "..irc2.config.NSPass))
 	end
 
-	irc.conn:join(irc.config.channel, irc.config.key)
-	irc.connected = true
+	irc2.conn:join(irc2.config.channel, irc2.config.key)
+	irc2.connected = true
 	minetest.log("action", "IRC: Connected!")
 	minetest.chat_send_all("IRC: Connected!")
 end
 
 
-function irc.disconnect(message)
-	if irc.connected then
+function irc2.disconnect(message)
+	if irc2.connected then
 		--The OnDisconnect hook will clear irc.connected and print a disconnect message
-		irc.conn:disconnect(message)
+		irc2.conn:disconnect(message)
 	end
 end
 
 
-function irc.say(to, message)
+function irc2.say(to, message)
 	if not message then
 		message = to
-		to = irc.config.channel
+		to = irc2.config.channel
 	end
-	to = to or irc.config.channel
+	to = to or irc2.config.channel
 
-	irc.queue(irc.msgs.privmsg(to, message))
+	irc2.queue(irc2.msgs.privmsg(to, message))
 end
 
 
-function irc.reply(message)
-	if not irc.last_from then
+function irc2.reply(message)
+	if not irc2.last_from then
 		return
 	end
 	message = message:gsub("[\r\n%z]", " \\n ")
-	irc.say(irc.last_from, message)
+	irc2.say(irc2.last_from, message)
 end
 
-function irc.send(msg)
-	if not irc.connected then return end
-	irc.conn:send(msg)
+function irc2.send(msg)
+	if not irc2.connected then return end
+	irc2.conn:send(msg)
 end
 
-function irc.queue(msg)
-	if not irc.connected then return end
-	irc.conn:queue(msg)
+function irc2.queue(msg)
+	if not irc2.connected then return end
+	irc2.conn:queue(msg)
 end
 
+-- Cloaking fix
+local irc_sendLocal = irc2.sendLocal
+
+function irc2.sendLocal(msg)
+    for _, player in ipairs(cloaking.get_cloaked_players()) do
+        minetest.chat_send_player(player, msg)
+    end
+    return irc_sendLocal(msg)
+end

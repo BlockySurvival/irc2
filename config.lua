@@ -2,37 +2,25 @@
 -- See LICENSE.txt for details.
 
 
-irc.config = {}
+irc2.config = {}
 
 local function setting(stype, name, default, required)
 	local value
-	if minetest.settings and minetest.settings.get and minetest.settings.get_bool then
-		-- The current methods for getting settings
-		if stype == "bool" then
-			value = minetest.settings:get_bool("irc."..name)
-		elseif stype == "string" then
-			value = minetest.settings:get("irc."..name)
-		elseif stype == "number" then
-			value = tonumber(minetest.settings:get("irc."..name))
-		end
-	else
-		-- The old methods for getting settings for backward compatibility. Deprecated on 0.4.16+
-		if stype == "bool" then
-			value = minetest.setting_getbool("irc."..name)
-		elseif stype == "string" then
-			value = minetest.setting_get("irc."..name)
-		elseif stype == "number" then
-			value = tonumber(minetest.setting_get("irc."..name))
-		end
+	if stype == "bool" then
+		value = minetest.setting_getbool("irc2."..name)
+	elseif stype == "string" then
+		value = minetest.setting_get("irc2."..name)
+	elseif stype == "number" then
+		value = tonumber(minetest.setting_get("irc2."..name))
 	end
 	if value == nil then
 		if required then
-			error("Required configuration option irc."..
+			error("Required configuration option irc2."..
 				name.." missing.")
 		end
 		value = default
 	end
-	irc.config[name] = value
+	irc2.config[name] = value
 end
 
 -------------------------
@@ -43,7 +31,7 @@ setting("string", "nick", nil, true) -- Nickname
 setting("string", "server", nil, true) -- Server address to connect to
 setting("number", "port", 6667) -- Server port to connect to
 setting("string", "NSPass") -- NickServ password
-setting("string", "sasl.user", irc.config.nick) -- SASL username
+setting("string", "sasl.user", irc2.config.nick) -- SASL username
 setting("string", "username", "Minetest") -- Username/ident
 setting("string", "realname", "Minetest") -- Real name/GECOS
 setting("string", "sasl.pass") -- SASL password
