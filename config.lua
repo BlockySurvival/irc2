@@ -6,12 +6,24 @@ irc2.config = {}
 
 local function setting(stype, name, default, required)
 	local value
-	if stype == "bool" then
-		value = minetest.setting_getbool("irc2."..name)
-	elseif stype == "string" then
-		value = minetest.setting_get("irc2."..name)
-	elseif stype == "number" then
-		value = tonumber(minetest.setting_get("irc2."..name))
+	if minetest.settings and minetest.settings.get and minetest.settings.get_bool then
+		-- The current methods for getting settings
+		if stype == "bool" then
+			value = minetest.settings:get_bool("irc2."..name)
+		elseif stype == "string" then
+			value = minetest.settings:get("irc2."..name)
+		elseif stype == "number" then
+			value = tonumber(minetest.settings:get("irc2."..name))
+		end
+	else
+		-- The old methods for getting settings for backward compatibility. Deprecated on 0.4.16+
+		if stype == "bool" then
+			value = minetest.setting_getbool("irc2."..name)
+		elseif stype == "string" then
+			value = minetest.setting_get("irc2."..name)
+		elseif stype == "number" then
+			value = tonumber(minetest.setting_get("irc2."..name))
+		end
 	end
 	if value == nil then
 		if required then
