@@ -139,7 +139,7 @@ function irc2.hooks.channelChat(msg)
 		irc2.sendLocal(("*** %s left %s")
 				:format(leavenick, msg.user.nick))
 	elseif foundtimedout then
-		irc.sendLocal(("*** %s left %s (Timed out)")
+		irc2.sendLocal(("*** %s left %s (Timed out)")
 				:format(timedoutnick, msg.user.nick))
 	elseif foundaction then
 		irc2.sendLocal(("* %s@%s %s")
