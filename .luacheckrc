@@ -2,7 +2,8 @@
 allow_defined_top = true
 
 read_globals = {
-	"minetest",
+	"minetest", "core",
+	"cloaking",
 }
 
 exclude_files = {
