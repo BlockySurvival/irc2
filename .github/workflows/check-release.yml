@@ -8,4 +8,4 @@ jobs:
       - name: lint
         uses: Roang-zero1/factorio-mod-luacheck@master
         with:
-          luacheckrc_url: https://raw.githubusercontent.com/minetest-mods/irc/master/.luacheckrc
+          luacheckrc_url: https://raw.githubusercontent.com/BlockySurvival/irc2/master/.luacheckrc
