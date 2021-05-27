@@ -7,11 +7,11 @@
 
 minetest.register_chatcommand("irc2_msg", {
 	params = "<name> <message>",
-	description = "Send a private message to a freenode IRC user",
+	description = "Send a private message to a Libera Chat (IRC) user",
 	privs = {shout=true},
 	func = function(name, param)
 		if not irc2.connected then
-			return false, "Not connected to freenode IRC. Use /irc2_connect to connect."
+			return false, "Not connected to Libera IRC. Use /irc2_connect to connect."
 		end
 		local found, _, toname, message = param:find("^([^%s]+)%s(.+)")
 		if not found then
@@ -41,26 +41,26 @@ minetest.register_chatcommand("irc2_msg", {
 
 minetest.register_chatcommand("irc2_names", {
 	params = "",
-	description = "List the users in freenode IRC.",
+	description = "List the users in Libera IRC.",
 	func = function()
 		if not irc2.connected then
-			return false, "Not connected to freenode IRC. Use /irc2_connect to connect."
+			return false, "Not connected to Libera IRC. Use /irc2_connect to connect."
 		end
 		local users = { }
 		for nick in pairs(irc2.conn.channels[irc2.config.channel].users) do
 			table.insert(users, nick)
 		end
-		return true, "Users in freenode IRC: "..table.concat(users, ", ")
+		return true, "Users in Libera IRC: "..table.concat(users, ", ")
 	end
 })
 
 
 minetest.register_chatcommand("irc2_connect", {
-	description = "Connect to the freenode IRC server.",
+	description = "Connect to the Libera IRC server.",
 	privs = {irc2_admin=true},
 	func = function(name)
 		if irc2.connected then
-			return false, "You are already connected to freenode IRC."
+			return false, "You are already connected to Libera IRC."
 		end
 		minetest.chat_send_player(name, "IRC: Connecting...")
 		irc2.connect()
@@ -70,11 +70,11 @@ minetest.register_chatcommand("irc2_connect", {
 
 minetest.register_chatcommand("irc2_disconnect", {
 	params = "[message]",
-	description = "Disconnect from freenode IRC.",
+	description = "Disconnect from Libera IRC.",
 	privs = {irc2_admin=true},
 	func = function(name, param)
 		if not irc2.connected then
-			return false, "Not connected to freenode IRC. Use /irc2_connect to connect."
+			return false, "Not connected to Libera IRC. Use /irc2_connect to connect."
 		end
 		if param == "" then
 			param = "Manual disconnect by "..name
@@ -85,11 +85,11 @@ minetest.register_chatcommand("irc2_disconnect", {
 
 
 minetest.register_chatcommand("irc2_reconnect", {
-	description = "Reconnect to freenode IRC.",
+	description = "Reconnect to Libera IRC.",
 	privs = {irc2_admin=true},
 	func = function(name)
 		if not irc2.connected then
-			return false, "Not connected to freenode IRC. Use /irc2_connect to connect."
+			return false, "Not connected to Libera IRC. Use /irc2_connect to connect."
 		end
 		minetest.chat_send_player(name, "IRC: Reconnecting...")
 		irc2.disconnect("Reconnecting...")
@@ -100,11 +100,11 @@ minetest.register_chatcommand("irc2_reconnect", {
 
 minetest.register_chatcommand("irc2_quote", {
 	params = "<command>",
-	description = "Send a raw command freenode IRC.",
+	description = "Send a raw command Libera IRC.",
 	privs = {irc2_admin=true},
 	func = function(name, param)
 		if not irc2.connected then
-			return false, "Not connected to freenode IRC. Use /irc2_connect to connect."
+			return false, "Not connected to Libera IRC. Use /irc2_connect to connect."
 		end
 		irc2.queue(param)
 		minetest.chat_send_player(name, "Command sent!")

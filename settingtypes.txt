@@ -10,7 +10,7 @@ irc2.auto_connect (Auto-connect on load) bool true
 irc2.nick (Bot nickname) string Minetest
 
 # Server to connect to.
-irc2.server (IRC server) string irc.freenode.net
+irc2.server (IRC server) string irc.libera.chat
 
 # Server port.
 # The standard IRC protocol port is 6667 for regular servers,

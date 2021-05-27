@@ -86,7 +86,7 @@ function irc2.hooks.ctcp(msg)
 
 	if command == "ACTION" and msg.args[1] == irc2.config.channel then
 		local action = text:sub(8, -1)
-		irc2.sendLocal(("* %s@freenode %s"):format(msg.user.nick, action))
+		irc2.sendLocal(("* %s@Libera %s"):format(msg.user.nick, action))
 	elseif command == "VERSION" then
 		reply(("Minetest version %s, IRC mod version %s.")
 			:format(get_core_version(), irc2.version))
@@ -106,7 +106,7 @@ function irc2.hooks.channelChat(msg)
 	-- Don't let a user impersonate someone else by using the nick "IRC"
 	local fake = msg.user.nick:lower():match("^[il|]rc$")
 	if fake then
-		irc2.sendLocal("<"..msg.user.nick.."@freenode> "..text)
+		irc2.sendLocal("<"..msg.user.nick.."@Libera> "..text)
 		return
 	elseif msg.user.nick == "BlockyRelay" then
 		return
@@ -145,7 +145,7 @@ function irc2.hooks.channelChat(msg)
 		irc2.sendLocal(("* %s@%s %s")
 				:format(actionnick, msg.user.nick, actionmessage))
 	else
-		irc2.sendLocal(("<%s@freenode> %s"):format(msg.user.nick, text))
+		irc2.sendLocal(("<%s@Libera> %s"):format(msg.user.nick, text))
 	end
 end
 
@@ -163,10 +163,10 @@ end
 
 function irc2.hooks.kick(channel, target, prefix, reason)
 	if target == irc2.conn.nick then
-		minetest.chat_send_all("IRC: kicked from "..channel.." (freenode) by "..prefix.nick..".")
+		minetest.chat_send_all("IRC: kicked from "..channel.." (Libera) by "..prefix.nick..".")
 		irc2.disconnect("Kicked")
 	else
-		irc2.sendLocal(("-!- %s was kicked from %s (freenode) by %s [%s]")
+		irc2.sendLocal(("-!- %s was kicked from %s (Libera) by %s [%s]")
 				:format(target, channel, prefix.nick, reason))
 	end
 end
@@ -174,7 +174,7 @@ end
 
 function irc2.hooks.notice(user, target, message)
 	if user.nick and target == irc2.config.channel then
-		irc2.sendLocal("-"..user.nick.."@freenode- "..message)
+		irc2.sendLocal("-"..user.nick.."@Libera- "..message)
 	end
 end
 
@@ -201,20 +201,20 @@ end
 
 
 function irc2.hooks.join(user, channel)
-	irc2.sendLocal(("-!- %s joined %s (freenode)")
+	irc2.sendLocal(("-!- %s joined %s (Libera)")
 			:format(user.nick, channel))
 end
 
 
 function irc2.hooks.part(user, channel, reason)
 	reason = reason or ""
-	irc2.sendLocal(("-!- %s has left %s (freenode) [%s]")
+	irc2.sendLocal(("-!- %s has left %s (Libera) [%s]")
 			:format(user.nick, channel, reason))
 end
 
 
 function irc2.hooks.quit(user, reason)
-	irc2.sendLocal(("-!- %s has quit freenode [%s]")
+	irc2.sendLocal(("-!- %s has quit Libera [%s]")
 			:format(user.nick, reason))
 end
 
